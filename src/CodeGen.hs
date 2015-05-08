@@ -34,9 +34,6 @@ generateDef (SFun name argNames _ expr) =
                  functionDefaults
                  (\args -> runCodeGen . withVars (map Just args) $ compile expr)
 
-ierror :: String -> a
-ierror msg = error $ "INTERNAL ERROR: CodeGen: " ++ msg
-
 compile :: SExp -> CodeGen (Maybe Operand)
 compile (SV v) = lookupVar v
 compile (SApp _ name args) = sequence <$> mapM lookupVar args >>= maybe (pure Nothing) (fmap Just . call' (show name))

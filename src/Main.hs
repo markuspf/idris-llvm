@@ -79,21 +79,11 @@ compileAndOutputModule (CodegenInfo {..}) =
   withContext $ \context -> do
   defTT <- getDefaultTargetTriple
   defCPU <- getHostCPUName
-  print "bla"
   initializeAllTargets
-  print "bla2"
   (target, str) <- failInIO $ lookupTarget Nothing defTT
-  print ("bla3: " ++ str)
   withTargetOptions $ \options -> do
-  print "bla4"
   withTargetMachine target defTT defCPU S.empty options R.Default CM.Default CGO.Default $ \targetMachine -> do
-  print "bla5" 
   layout <- getTargetMachineDataLayout targetMachine
-  print "bla6"
-  print outputFile
-  print simpleDecls
-  print layout
-  print defTT
   failInIO $ MO.withModuleFromAST context (runModuleGen outputFile (generateCode simpleDecls) (Target defTT layout)) $ \m -> do
   print "bla7"
   let opts = PM.defaultCuratedPassSetSpec { PM.optLevel = Just 2 -- TODO optimisation
@@ -129,4 +119,5 @@ failInIO :: ExceptT String IO a -> IO a
 failInIO = either fail return <=< runExceptT
 
 ierror :: String -> a
-ierror msg = error $ "INTERNAL ERROR: Main: " ++ msg
+ierror msg = error $ "INTERNAL ERROR: CodeGenTypes: " ++ msg
+

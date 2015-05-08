@@ -152,7 +152,9 @@ typeOfGEP (PointerType ty addrspace) (_:xs) = PointerType (helper ty xs) addrspa
     helper ty [] = ty
     helper (ArrayType _ ty) (_:os) = helper ty os
     helper (VectorType _ ty) (_:os) = helper ty os
-    helper (StructureType _ elts) (ConstantOperand (C.Int _ i):os) = helper (elts !! (fromIntegral i)) os
+    helper (StructureType _ elts) (ConstantOperand (C.Int _ i):os) = case ((length elts) < (fromIntegral i)) of
+                                                                       True -> helper (elts !! (fromIntegral i)) os
+                                                                       False -> error $ "typeOf on GEP array out of bounds"
     helper (StructureType _ elts) (ConstantOperand c:_) =
       error $ "typeOf on GEP with ill-typed index into struct " ++ show c
     helper (StructureType _ elts) (i:_) =

@@ -65,7 +65,9 @@ withVars ops (CodeGen cg) = CodeGen $ do
   return r
 
 lookupVar :: LVar -> CodeGen (Maybe Operand)
-lookupVar (Loc level) = gets (\(Env el vs) -> vs !! (el - level))
+lookupVar (Loc level) = gets (\(Env el vs) -> case (el-level-1) < (length vs) of
+                                                True -> vs !! (el - level - 1)
+                                                False -> ierror $ "lookup blammed\n" ++ show vs ++ "\n" ++ show el ++ "\n" ++ show level ++ "\n" ++ show (el-level) ++ "\n" ++ show (length vs) ++ "\n" ++ show ((length vs) < (el - level - 1)))
 lookupVar (Glob n) = do
   let name = Name . show $ n
   result <- findGlobal name

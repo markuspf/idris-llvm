@@ -3,6 +3,8 @@ module Constants (compileConst) where
 import LLVM.General.AST
 import qualified LLVM.General.AST.Constant as C
 import qualified LLVM.General.AST.Float as F
+import qualified LLVM.General.AST.Global as G
+import qualified LLVM.General.AST.Linkage as L
 
 import IRTS.Lang
 import Idris.Core.TT (ArithTy(..), IntTy(..), Const(..), NativeTy(..))
@@ -31,11 +33,23 @@ compileConst c@(B64 _) = foreignToIdris (FArith (ATInt (ITFixed IT64))) (Constan
 compileConst c@(Fl _) = foreignToIdris (FArith ATFloat) (ConstantOperand $ cgConst' c)
 compileConst c@(Ch _) = foreignToIdris (FArith (ATInt ITChar)) (ConstantOperand $ cgConst' c)
 compileConst c@(Str s) = do
-  str <- addGlobal "" (ArrayType (1 + fromIntegral (length s)) (IntegerType 8))
-  foreignToIdris FString (ConstantOperand $ C.GetElementPtr True str [C.Int 32 0, C.Int 32 0])
+   str <- addGlobal "" $ globalVariableDefaults
+                { G.linkage = L.Internal
+                , G.hasUnnamedAddr = True
+                , G.isConstant = True
+                , G.type' = ArrayType (1 + fromIntegral (length s)) (IntegerType 8)
+                , G.initializer = Just (cgConst' c)
+                }
+   foreignToIdris FString (ConstantOperand $ C.GetElementPtr True str [C.Int 32 0, C.Int 32 0])
 compileConst c@(BI i) = do
   let stringRepLen = (if i < 0 then 2 else 1) + fromInteger (numDigits 10 i)
-  str <- "" addGlobal (ArrayType stringRepLen (IntegerType 8))
+  str <- addGlobal "" $ globalVariableDefaults
+               { G.linkage = L.Internal
+               , G.hasUnnamedAddr = True
+               , G.isConstant = True
+               , G.type' = ArrayType stringRepLen (IntegerType 8)
+               , G.initializer = Just (cgConst' c)
+               }
   mpz <- gcAllocValue bigIntTy
   call' "__gmpz_init_set_str" [ mpz
                               , ConstantOperand $ C.GetElementPtr True str [ C.Int 32 0, C.Int 32 0]
