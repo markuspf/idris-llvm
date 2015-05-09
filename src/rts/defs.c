@@ -5,6 +5,8 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "getline.h"
+
 extern char** environ;
 
 void putStr(const char *str) {
@@ -68,7 +70,7 @@ char *__idris_readStr(FILE *h)
 	size_t n = 0;
 	ssize_t len = 0;
 
-	len = getline(&buffer, &n, h)
+	len = getline(&buffer, &n, h);
 	strtok(buffer, "\n");
 
 	if (len <= 0) {
