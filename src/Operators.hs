@@ -260,6 +260,22 @@ compileOp LReadStr [p] = do
   s <- call' "__idris_readStr" [np]
   idrisToForeign FString s
 
+compileOp LWriteStr [_ ,p] = do
+  np <- idrisToForeign FPtr p
+  call' "__idris_writeStr" [np]
+
+compileOp (LExternal wf) [_,x] = do
+  return x
+
+compileOp (LExternal wf) [] = do
+  return (ConstantOperand (C.Int 32 10))
+
+compileOp (LExternal wf) [_,x,y] = do
+  return x
+
+compileOp LNoOp [] = do
+  return (ConstantOperand (C.Int 32 10))
+
 compileOp prim args = error $ "Unimplemented primitive: <" ++ show prim ++ ">("
                   ++ intersperse ',' (take (length args) ['a'..]) ++ ")"
 

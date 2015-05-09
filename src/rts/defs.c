@@ -62,6 +62,22 @@ char *__idris_strCons(char c, char *s) {
   return result;
 }
 
+char *__idris_readStr(FILE *h)
+{
+	char *buffer = NULL;
+	size_t n = 0;
+	ssize_t len = 0;
+
+	len = getline(&buffer, &n, h)
+	strtok(buffer, "\n");
+
+	if (len <= 0) {
+		return "";
+	} else {
+		return buffer; 
+	}
+}
+
 void* fileOpen(char* name, char* mode) {
   FILE* f = fopen(name, mode);
   return (void*)f;

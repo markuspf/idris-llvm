@@ -51,9 +51,7 @@ showUsage = do putStrLn "Usage: idris-llvm <ibc-files> [-o <output-file>]"
 getOpts :: IO Opts
 getOpts = do xs <- getArgs
              triple <- getDefaultTargetTriple
-             print triple
              cpu <- getHostCPUName
-             print cpu
              return $ helper (Opts [] "a.out" triple cpu) xs
   where
     helper opts ("-o":o:xs) = helper (opts { output = o }) xs
@@ -85,7 +83,6 @@ compileAndOutputModule (CodegenInfo {..}) =
   withTargetMachine target defTT defCPU S.empty options R.Default CM.Default CGO.Default $ \targetMachine -> do
   layout <- getTargetMachineDataLayout targetMachine
   failInIO $ MO.withModuleFromAST context (runModuleGen outputFile (generateCode simpleDecls) (Target defTT layout)) $ \m -> do
-  print "bla7"
   let opts = PM.defaultCuratedPassSetSpec { PM.optLevel = Just 2 -- TODO optimisation
                                           , PM.simplifyLibCalls = Just True
                                           , PM.useInlinerWithThreshold = Just 225
